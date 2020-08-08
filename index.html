@@ -32,8 +32,60 @@
             padding-bottom: 2em !important;
         }
 
-        .bersihkan {
+        .keywordSearch {
+            display: flex;
+            border: 1px solid #a9a9a9;
+            justify-content: space-between;
+        }
 
+        .bersihkan {
+            border: none !important;
+            background-color: transparent !important;
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        .bersihkan.focus,
+        .bersihkan:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .bersihkan:hover {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .bersihkan.active,
+        .bersihkan:active {
+            outline: none;
+        }
+
+        .bersihkan.active.focus,
+        .bersihkan.active:focus,
+        .bersihkan.active:hover,
+        .bersihkan:active.focus,
+        .bersihkan:active:focus,
+        .bersihkan:active:hover {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .fa.fa-times-circle {
+            padding-left: 3px;
+        }
+
+        .mainTitle {
+            text-align:center
+        }
+
+        .mainTitle #logo {
+            margin: 0 auto;
+        }
+
+        .url {
+            width: 360px;
+            max-width: 600px;
         }
     </style>
 </head>
@@ -41,8 +93,10 @@
 <body>
     <div id="app" class="container">
         <div class="jumbotron">
-            <img src="assets/logo.png" alt="Logo Vue.js" srcset="">
-            <p class="lead">A Vue.js one page application project</p>
+            <div class="mainTitle">
+                <img id="logo" src="assets/logo.png" alt="Logo Vue.js" srcset="">
+                <p class="lead">A Vue.js one page application project</p>
+            </div>
             <hr class="my-4">
             <div class="mb-1">
                 <label>URL Video Youtube: </label>
@@ -50,7 +104,7 @@
                     v-model="url" />
             </div>
 
-            <div class="input-group mb-2 border rounded-pill p-1">
+            <div class="keywordSearch input-group mb-2 border rounded-pill p-1">
                 <div class="input-group-prepend border-0">
                     <button id="button-addon4" type="button" class="btn btn-link text-info"><i
                             class="fa fa-search"></i></button>
