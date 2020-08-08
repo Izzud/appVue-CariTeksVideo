@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Vue</title>
+    <!-- CSS only -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <!-- JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+
+    <!-- fa -->
+    <script src="https://use.fontawesome.com/e869103379.js"></script>
+    <style>
+        input[type=search]::-webkit-search-cancel-button {
+            -webkit-appearance: searchfield-cancel-button;
+        }
+
+        .jumbotron {
+            padding-bottom: 2em !important;
+        }
+
+        .bersihkan {
+
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <div class="jumbotron">
+            <img src="assets/logo.png" alt="Logo Vue.js" srcset="">
+            <p class="lead">A Vue.js one page application project</p>
+            <hr class="my-4">
+            <div class="mb-1">
+                <label>URL Video Youtube: </label>
+                <input placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="url" type="text"
+                    v-model="url" />
+            </div>
+
+            <div class="input-group mb-2 border rounded-pill p-1">
+                <div class="input-group-prepend border-0">
+                    <button id="button-addon4" type="button" class="btn btn-link text-info"><i
+                            class="fa fa-search"></i></button>
+                </div>
+                <input v-model="kataKunci" type="search" placeholder="What're you searching for?"
+                    aria-describedby="button-addon4" class="form-control bg-none border-0">
+                <button class="bersihkan btn btn-light" @click="bersihkan"><i class="fa fa-times-circle"
+                        aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="total">
+                <span v-if="daftarHasil.length > 0">Total Hasil Pencarian: {{ paginasi.total }}</span>
+                <span v-else-if="kataKunci && kataKunci.length >= 3 && daftarHasil.length < 0">Keyword tidak ditemukan
+                    dalam video</span></div>
+        </div>
+        <div class="Search" v-if="daftarHasil.length > 0">
+            <div class="hasilQuery mb-2">
+                <table class="table table-striped">
+                    <thead>
+                        <th scope="col">#</th>
+                        <th scope="col">Teks</th>
+                        <th scope="col">Link</th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(hasil, i) in daftarHasil" :key="i">
+                            <td> {{ i+1 }} </td>
+                            <td>
+                                <span v-html="hasil.text"></span>
+                            </td>
+                            <td>
+                                <a :href="`${url}&t=${hasil.start}s`" target="_blank">Link video</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="halaman mb-1">Halaman ke: {{ paginasi.page }}</div>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-secondary" @click="navigasi('first')"
+                    :disabled="!paginasi['first']">
+                    First
+                </button>
+                <button type="button" class="btn btn-secondary" @click="navigasi('prev')" :disabled="!paginasi['prev']">
+                    Prev
+                </button>
+                <button type="button" class="btn btn-secondary" @click="navigasi('next')" :disabled="!paginasi['next']">
+                    Next
+                </button>
+                <button type="button" class="btn btn-secondary" @click="navigasi('last')" :disabled="!paginasi['last']">
+                    Last
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="index.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                url: 'https://www.youtube.com/watch?v=klnvttPfOUM',
+                kataKunci: '',
+                daftarHasil: [],
+                paginasi: {
+                    first: null,
+                    last: null,
+                    prev: null,
+                    next: null,
+                    total: 0,
+                    page: null
+                }
+            },
+            watch: {
+                kataKunci: pDebounce(async function tanganiKataKunci(kataKunci) {
+                    if (kataKunci && kataKunci.length >= 3) {
+                        await this.cari(kataKunci, this.url)
+                    } else {
+                        this.bersihkanHasilDanPaginasi()
+                    }
+                }, 250)
+            },
+            methods: {
+                async cari(kataKunci, url, paginasi) {
+                    try {
+                        const respon = await fetch(
+                            paginasi
+                                ? paginasi
+                                : `https://cari-teks-video-api.vercel.app/api/search?q=${kataKunci}&url=${encodeURIComponent(
+                                    url
+                                )}`
+                        ).then(_ => (_.ok ? _.json() : []))
+
+                        this.daftarHasil = respon.data
+                        this.paginasi.first = respon.first
+                        this.paginasi.last = respon.last
+                        this.paginasi.prev = respon.prev
+                        this.paginasi.next = respon.next
+                        this.paginasi.total = respon.total
+                        this.paginasi.page = respon.page
+                    } catch (error) { }
+                },
+                async navigasi(type) {
+                    if (!this.paginasi[type]) {
+                        return
+                    }
+                    await this.cari(this.kataKunci, this.url, this.paginasi[type])
+                },
+                bersihkan() {
+                    this.kataKunci = ''
+                    this.bersihkanHasilDanPaginasi()
+                },
+                bersihkanHasilDanPaginasi() {
+                    this.daftarHasil = []
+                    this.paginasi = {
+                        first: null,
+                        last: null,
+                        prev: null,
+                        next: null,
+                        total: 0,
+                        page: null
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
